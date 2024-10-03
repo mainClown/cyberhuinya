@@ -1,0 +1,65 @@
+@startuml
+title ""
+
+autonumber
+participant "Средства\nсвязи" as coms
+participant "Центр\nпланирования" as planning #red
+participant "Расчет\nмаршрута" as route
+participant "Система контроля\nробота" as robot
+participant "Построение\nкарты" as mapping
+participant "Центр обработки\nданных" as dataproc
+participant "Датчики" as sensors
+participant "Распознавание и\nклассификация объектов" as detection
+participant "Приводы" as servos
+participant "База данных" as database
+
+
+group Получение и анализ задания
+coms-> planning++: задание
+mapping->planning: текущее состояние карты
+planning-[#red]>planning: анализ и обработка задания
+planning-[#red]>route++: обработанное задание
+end
+
+route->robot++: первичные параметры перемещения
+
+loop Следование в район задания
+sensors->dataproc++: показания
+dataproc->mapping++: изменения\nокружения
+mapping->mapping: корректирвока карты
+dataproc->robot: изменения\nокружения
+mapping-->route: скорректированная карта
+dataproc->detection++: изменения\nокружения
+database->detection--: возможные объекты
+route->robot: обновленный маршрут
+detection->robot: обнаруженные\nпрепятствия
+robot->robot: локальная\nкорректировка\nмаршрута
+robot->servos++: управляющие\nвоздействия
+servos->dataproc: движения робота
+mapping->dataproc: текущая карта
+dataproc-[#red]>dataproc: проверка достижения\nрайона задания
+end
+
+dataproc-[#red]>planning: район задания достигнут
+
+group Работа в районе задания
+
+loop Выполнение задания
+sensors->dataproc: показания
+dataproc->detection: изменения\nокружения
+database->detection: возможные объекты
+detection->robot: обнаруженные\n препятствия
+robot->servos: управляющие\nвоздействия
+note left 
+Неправильная обработка задания может привести к
+неверному выполнению задания, что может привести к
+нарушению ЦБ 1, 2 и 3.
+end note
+servos->dataproc: движения робота
+dataproc-[#red]>planning: текущий\nпрогресс\nзадания
+planning-[#red]>planning: проверка\nвыполнения\nзадания
+end
+end
+
+planning-[#red]>coms: отчет о\nрезультатах\nвыполнения\nзадания
+@enduml

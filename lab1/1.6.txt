@@ -1,0 +1,67 @@
+@startuml
+title ""
+
+autonumber
+participant "Средства\nсвязи" as coms
+participant "Центр\nпланирования" as planning
+participant "Расчет\nмаршрута" as route
+participant "Система контроля\nробота" as robot 
+participant "Построение\nкарты" as mapping 
+participant "Центр обработки\nданных" as dataproc #red
+participant "Датчики" as sensors
+participant "Распознавание и\nклассификация объектов" as detection
+participant "Приводы" as servos
+participant "База данных" as database
+
+
+group Получение и анализ задания
+coms-> planning++: задание
+mapping->planning: текущее состояние карты
+planning->planning: анализ и обработка задания
+planning->route++: обработанное задание
+end
+
+route->robot++: первичные параметры перемещения
+
+loop Следование в район задания
+sensors->dataproc++: показания
+dataproc-[#red]>mapping++: изменения\nокружения
+mapping-[#red]>mapping: корректирвока карты
+dataproc-[#red]>robot: изменения\nокружения
+mapping--[#red]>route: скорректированная карта
+dataproc-[#red]>detection++: изменения\nокружения
+database->detection--: возможные объекты
+route-[#red]>robot: обновленный маршрут
+detection-[#red]>robot: обнаруженные\nпрепятствия
+robot-[#red]>robot: локальная\nкорректировка\nмаршрута
+robot-[#red]>servos++: управляющие\nвоздействия
+servos->dataproc: движения робота
+note left
+Компрометация обработки информации может привести
+к передаче неверных данных для построения карты,
+распознавания препятствий и корректировки контроля робота
+и как следствие к неверным движениям робота. 
+Могут быть нарушены ЦБ 1, 2 и 3.
+end note
+mapping-[#red]>dataproc: текущая карта
+dataproc-[#red]>dataproc: проверка достижения\nрайона задания
+end
+
+dataproc-[#red]>planning: район задания достигнут
+
+group Работа в районе задания
+
+loop Выполнение задания
+sensors->dataproc: показания
+dataproc->detection: изменения\nокружения
+database->detection: возможные объекты
+detection->robot: обнаруженные\n препятствия
+robot->servos: управляющие\nвоздействия
+servos->dataproc: движения робота
+dataproc->planning: текущий\nпрогресс\nзадания
+planning->planning: проверка\nвыполнения\nзадания
+end
+end
+
+planning->coms: отчет о\nрезультатах\nвыполнения\nзадания
+@enduml

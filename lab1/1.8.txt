@@ -1,0 +1,66 @@
+@startuml
+title ""
+
+autonumber
+participant "Средства\nсвязи" as coms
+participant "Центр\nпланирования" as planning
+participant "Расчет\nмаршрута" as route
+participant "Система контроля\nробота" as robot 
+participant "Построение\nкарты" as mapping 
+participant "Центр обработки\nданных" as dataproc
+participant "Датчики" as sensors
+participant "Распознавание и\nклассификация объектов" as detection #red
+participant "Приводы" as servos
+participant "База данных" as database
+
+
+group Получение и анализ задания
+coms-> planning++: задание
+mapping->planning: текущее состояние карты
+planning->planning: анализ и обработка задания
+planning->route++: обработанное задание
+end
+
+route->robot++: первичные параметры перемещения
+
+loop Следование в район задания
+sensors->dataproc++: показания
+dataproc->mapping++: изменения\nокружения
+mapping->mapping: корректирвока карты
+dataproc->robot: изменения\nокружения
+mapping-->route: скорректированная карта
+dataproc->detection++: изменения\nокружения
+database->detection--: возможные объекты
+route->robot: обновленный маршрут
+detection-[#red]>robot: обнаруженные\nпрепятствия
+robot-[#red]>robot: локальная\nкорректировка\nмаршрута
+robot-[#red]>servos++: управляющие\nвоздействия
+servos-[#red]>dataproc: движения робота
+note left
+Неверное распознавание объектов может привести
+к передаче неверных данных для построения маршрута
+и как следствие к неверным движениям робота. 
+Могут быть нарушены ЦБ 1, 2 и 3.
+end note
+mapping->dataproc: текущая карта
+dataproc->dataproc: проверка достижения\nрайона задания
+end
+
+dataproc->planning: район задания достигнут
+
+group Работа в районе задания
+
+loop Выполнение задания
+sensors->dataproc: показания
+dataproc->detection: изменения\nокружения
+database->detection: возможные объекты
+detection->robot: обнаруженные\n препятствия
+robot->servos: управляющие\nвоздействия
+servos->dataproc: движения робота
+dataproc->planning: текущий\nпрогресс\nзадания
+planning->planning: проверка\nвыполнения\nзадания
+end
+end
+
+planning->coms: отчет о\nрезультатах\nвыполнения\nзадания
+@enduml
