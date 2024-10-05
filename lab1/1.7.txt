@@ -52,7 +52,7 @@ dataproc-[#red]>planning: район задания достигнут
 group Работа в районе задания
 
 loop Выполнение задания
-sensors->dataproc: показания
+sensors-[#red]>dataproc: показания
 dataproc->detection: изменения\nокружения
 database->detection: возможные объекты
 detection->robot: обнаруженные\n препятствия

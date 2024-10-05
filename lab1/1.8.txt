@@ -54,9 +54,9 @@ loop Выполнение задания
 sensors->dataproc: показания
 dataproc->detection: изменения\nокружения
 database->detection: возможные объекты
-detection->robot: обнаруженные\n препятствия
-robot->servos: управляющие\nвоздействия
-servos->dataproc: движения робота
+detection-[#red]>robot: обнаруженные\n препятствия
+robot-[#red]>servos: управляющие\nвоздействия
+servos-[#red]>dataproc: движения робота
 dataproc->planning: текущий\nпрогресс\nзадания
 planning->planning: проверка\nвыполнения\nзадания
 end

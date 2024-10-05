@@ -56,7 +56,7 @@ dataproc->detection: изменения\nокружения
 database->detection: возможные объекты
 detection->robot: обнаруженные\n препятствия
 robot->servos: управляющие\nвоздействия
-servos->dataproc: движения робота
+servos-[#red]>dataproc: движения робота
 dataproc->planning: текущий\nпрогресс\nзадания
 planning->planning: проверка\nвыполнения\nзадания
 end
